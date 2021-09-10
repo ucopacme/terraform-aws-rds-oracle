@@ -64,7 +64,7 @@ inputs = {
 }
 
 terraform {
-   source = "git::https://git@github.com/ucopacme/terraform-aws-rds-oracle.git"
+   source = "git::https://git@github.com/ucopacme/terraform-aws-rds-oracle.git//?ref=v0.0.1"
 
 
 }
