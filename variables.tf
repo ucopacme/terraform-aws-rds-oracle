@@ -19,7 +19,6 @@ variable "name" {
   description = "database name"
   type = string
   default = "ORACLEDB"
-  
 }
 variable "enabled" {
   default     = true
@@ -35,6 +34,11 @@ variable "storage_encrypted" {
   default     = true
   description = "Set to `false` to not encrypt the storage"
   type        = bool
+}
+variable "storage_type" {
+  default     = "gp3"
+  description = "gp2, gp3 (default), or io1."
+  type        = string
 }
 variable "publicly_accessible" {
   default     = false
@@ -100,24 +104,21 @@ variable "subnet_ids" {
   type        = list(string)
   description = "List of subnets"
   default     = []
-
 }
 
 variable "secret_manager_name" {
   type = string
   description = " secret manager name"
   default = ""
-  
 }
 
- variable "max_allocated_storage" {
-  type = string 
+variable "max_allocated_storage" {
+  type = string
   description = "Max allocate storage"
   default = null
-  
- } 
+}
 
- variable "license_model" {
+variable "license_model" {
   description = "One of license-included, bring-your-own-license, general-public-license"
   default = "bring-your-own-license"
 }

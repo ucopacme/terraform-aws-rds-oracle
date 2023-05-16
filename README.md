@@ -11,7 +11,7 @@ Terraform module to provision AWS [`RDS ORACLE`](https://aws.amazon.com/rds/) in
 The module will create:
 
 * DB instance (ORACLE)
-* DB Option Group (will use the default )
+* DB Option Group (will use the default)
 * DB Parameter Group (will use the default)
 * DB Subnet Group
 * DB Security Group
@@ -42,7 +42,7 @@ inputs = {
   subnet_ids              = ["subnet-0ece5975ca259796e", "subnet-084c56f1fd8699660"]
   allocated_storage       = "30"
   max_allocated_storage   = "50"
-  engine                  = "oracle-ee" 
+  engine                  = "oracle-ee"
   identifier              = "rds-test-oracle"
   engine_version          = "19.0.0.0.ru-2021-07.rur-2021-07.r1"
   instance_class          = "db.t3.large"
