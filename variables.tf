@@ -40,6 +40,11 @@ variable "storage_type" {
   description = "gp2, gp3 (default), or io1."
   type        = string
 }
+variable "iops" {
+  default     = 3000
+  description = "(Optional) The amount of provisioned IOPS"
+  type        = number
+}
 variable "publicly_accessible" {
   default     = false
   description = "Set to `false` to prevent Database accessibility"
