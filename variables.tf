@@ -40,6 +40,11 @@ variable "storage_type" {
   description = "gp2, gp3 (default), or io1."
   type        = string
 }
+variable "storage_throughput" {
+  default     = 125
+  description = "(Optional) The storage throughput value for the DB instance"
+  type        = number
+}
 variable "iops" {
   default     = 3000
   description = "(Optional) The amount of provisioned IOPS"
