@@ -1,3 +1,4 @@
+data "aws_caller_identity" "this" {}
 
 # create RDS ORACLE  db instance
 resource "aws_db_instance" "this" {
