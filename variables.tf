@@ -1,3 +1,8 @@
+variable "copy_tags_to_snapshot" {
+  description = "On delete, copy all Instance tags to the final snapshot"
+  type        = bool
+  default     = true
+}
 variable "password" {
   description = "RDS Password"
   type        = string
@@ -179,4 +184,9 @@ variable "monitoring_interval" {
   description = "The interval (seconds) between points when Enhanced Monitoring metrics are collected"
   type        = number
   default     = 0
+}
+variable "manage_master_user_password" {
+  description = "Set to true to allow RDS to manage the master user password in Secrets Manager."
+  type        = bool
+  default     = false
 }
