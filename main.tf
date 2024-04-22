@@ -16,11 +16,11 @@ resource "aws_db_instance" "this" {
   engine_version                = var.engine_version
   identifier                    = var.identifier
   instance_class                = var.instance_class
-  name                          = var.name
+  #name                          = var.name
   manage_master_user_password   = var.manage_master_user_password ? true : null
   username                      = var.manage_master_user_password ? var.username : jsondecode(aws_secretsmanager_secret_version.this[0].secret_string)["username"]
   password                      = var.manage_master_user_password ? null : jsondecode(aws_secretsmanager_secret_version.this[0].secret_string)["password"]
-   parameter_group_name         = var.parameter_group_name
+  parameter_group_name          = var.parameter_group_name
   skip_final_snapshot           = var.skip_final_snapshot
   storage_encrypted             = var.storage_encrypted
   storage_type                  = var.storage_type
@@ -80,4 +80,76 @@ resource "aws_secretsmanager_secret_version" "this" {
     "password": "${random_password.password.result}"
    }
 EOF
+}
+
+resource "aws_kms_key" "this" {
+  count                    = var.create_cmk ? 1 : 0
+  description              = "CMK for RDS instance ${var.identifier}"
+  key_usage                = "ENCRYPT_DECRYPT"
+  customer_master_key_spec = "SYMMETRIC_DEFAULT"
+  multi_region             = var.cmk_multi_region
+  policy                   = data.aws_iam_policy_document.this.json
+  tags                     = var.tags
+}
+
+resource "aws_kms_alias" "this" {
+  count         = var.create_cmk ? 1 : 0
+  name          = "alias/ucop/rds/${var.identifier}"
+  target_key_id = aws_kms_key.this.*.key_id[0]
+}
+
+data "aws_iam_policy_document" "this" {
+  statement {
+    sid       = "Enable IAM User Permissions"
+    effect    = "Allow"
+    resources = ["*"]
+    actions   = ["kms:*"]
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.this.account_id}:root"]
+    }
+  }
+
+  statement {
+    sid       = "Allow use of the key"
+    effect    = "Allow"
+    resources = ["*"]
+
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey",
+    ]
+
+    principals {
+      type        = "AWS"
+      identifiers = [for account_id in concat([data.aws_caller_identity.this.account_id], var.cmk_allowed_aws_account_ids) : "arn:aws:iam::${account_id}:root"]
+    }
+  }
+
+  statement {
+    sid       = "Allow attachment of persistent resources"
+    effect    = "Allow"
+    resources = ["*"]
+
+    actions = [
+      "kms:CreateGrant",
+      "kms:ListGrants",
+      "kms:RevokeGrant",
+    ]
+
+    condition {
+      test     = "Bool"
+      variable = "kms:GrantIsForAWSResource"
+      values   = ["true"]
+    }
+
+    principals {
+      type        = "AWS"
+      identifiers = [for account_id in concat([data.aws_caller_identity.this.account_id], var.cmk_allowed_aws_account_ids) : "arn:aws:iam::${account_id}:root"]
+    }
+  }
 }
