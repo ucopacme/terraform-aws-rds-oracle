@@ -65,22 +65,27 @@ resource "random_password" "password" {
 }
 
 
-# create secret and secret versions for database master account 
+# create secret and secret versions for database master account
 
 resource "aws_secretsmanager_secret" "this" {
-  name                          = var.secret_manager_name
-  recovery_window_in_days       = 7
-  tags                          = var.tags
+  count                   = var.manage_master_user_password ? 0 : 1
+  name                    = var.secret_manager_name
+  recovery_window_in_days = 7
+  tags                    = var.tags
 }
 
 resource "aws_secretsmanager_secret_version" "this" {
-  secret_id                     = aws_secretsmanager_secret.this.id
+  count         = var.manage_master_user_password ? 0 : 1
+  secret_id     = aws_secretsmanager_secret.this[0].id
   secret_string = <<EOF
    {
-    "username": "admin",
+    "username": "${var.username}",
     "password": "${random_password.password.result}"
    }
 EOF
+  lifecycle {
+    ignore_changes = [secret_string]
+  }
 }
 
 resource "aws_kms_key" "this" {
