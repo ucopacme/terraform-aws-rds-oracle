@@ -14,6 +14,17 @@ variable "secret_id" {
   type        = string
   default     = ""
 }
+variable "username" {
+  type = string
+  description = "Username for the master DB user."
+  default = "admin"
+}
+
+variable "manage_master_user_password" {
+  description = "Set to true to allow RDS to manage the master user password in Secrets Manager."
+  type        = bool
+  default     = false
+}
 
 variable "kms_key_id" {
   default     = null
