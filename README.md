@@ -27,44 +27,107 @@ Create terragrunt.hcl config file and past the following configuration.
 ```hcl
 
 #
-# Include all settings from root terragrunt.hcl file
-include {
-  path = find_in_parent_folders()
+
+ resource "aws_db_parameter_group" "this" {
+  name   = "dev-oracle-ee-19"
+  family = "oracle-ee-19"
+  # parameter {
+  #   name  = "character_set_client"
+  #   value = "utf8"
+  # }
+  # parameter {
+  #   name  = "character_set_connection"
+  #   value = "utf8"
+  # }
+  # parameter {
+  #   name  = "character_set_database"
+  #   value = "utf8"
+  # }
+  # parameter {
+  #   name  = "character_set_filesystem"
+  #   value = "utf8"
+  # }
+  # parameter {
+  #   name  = "character_set_results"
+  #   value = "utf8"
+  # }
+  # parameter {
+  #   name  = "character_set_server"
+  #   value = "utf8"
+  # }
+
+  # parameter {
+  #   name  = "general_log"
+  #   value = "1"
+  # }
+
+  # parameter {
+  #   name  = "slow_query_log"
+  #   value = "1"
+  # }
+
+  tags = local.tags
 }
 
-
-# dependency "sg" {
-#   config_path = "../sg_test"
-# }
-
-inputs = {
-  enabled                 = true
-  subnet_ids              = ["subnet-0ece5975ca259796e", "subnet-084c56f1fd8699660"]
-  allocated_storage       = "30"
-  max_allocated_storage   = "50"
-  engine                  = "oracle-ee"
-  identifier              = "rds-test-oracle"
-  engine_version          = "19.0.0.0.ru-2021-07.rur-2021-07.r1"
-  instance_class          = "db.t3.large"
-  secret_manager_name     = "secret-manager-rds-test-kk-oracles"
-  publicly_accessible     = true
-  deletion_protection     = false
-  apply_immediately       = true
-  backup_retention_period = "14"
-  vpc_security_group_ids  = [dependency.sg.outputs.sg_id]
-  license_model           = "bring-your-own-license"
-  tags = {
-    "ucop:application" = "test"
-    "ucop:createdBy"   = "Terraform"
-    "ucop:environment"  = "Prod"
-    "ucop:group"       = "CHS"
-    "ucop:source"      = join("/", ["https://github.com/ucopacme/ucop-terraform-config/tree/master/terraform/its-chs-dev/us-west-2", path_relative_to_include()])
-  }
-
+module "sg" {
+  enabled                = true
+  source                 = "git::https://git@github.com/ucopacme/terraform-aws-security-group.git//"
+  name                   = join("-", [local.application, local.environment, "rds", "sg"])
+  vpc_id                 = local.vpc_id
+  revoke_rules_on_delete = false
+  ingress = [
+    {
+      type        = "ingress"
+      from_port   = 1521
+      to_port     = 1521
+      protocol    = "tcp"
+      cidr_blocks = ["10.48.64.0/19"]
+      self        = null
+      description = "Allow MySQL from SDSC /19"
+    },
+    {
+      type        = "ingress"
+      from_port   = 1521
+      to_port     = 1521
+      protocol    = "tcp"
+      cidr_blocks = ["10.49.208.20/32"]
+      self        = null
+      description = "Allow MySQL from Dev EC2"
+    },
+  ]
+  egress = [
+    {
+      type        = "egress"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "all"
+      cidr_blocks = ["0.0.0.0/0"]
+      self        = null
+      description = "Allow egress to anywhere"
+    }
+  ]
+  tags = merge(tomap({ "Name" = join("-", [local.application, local.environment, "rds", "sg"]) }), local.tags)
 }
 
-terraform {
-   source = "git::https://git@github.com/ucopacme/terraform-aws-rds-oracle.git//?ref=v0.0.2"
-
-
+module "ora" {
+  source                       = "git::https://git@github.com/ucopacme/terraform-aws-rds-oracle.git//?ref=v0.0.3"
+  subnet_ids                   = [local.data_subnet_ids[0], local.data_subnet_ids[1]]
+  allocated_storage            = "200"
+  max_allocated_storage        = "300"
+  engine                       = "oracle-ee" ### (oracle-ee, oracle-se, oracle-se1, oracle-se2)
+  identifier                   = "dev-ora-01"
+  manage_master_user_password  = true
+  engine_version               = "19.0.0.0.ru-2024-01.rur-2024-01.r1"
+  instance_class               = "db.m5.large"
+  storage_type                 = "gp2"
+  publicly_accessible          = false
+  parameter_group_name         = aws_db_parameter_group.this.name
+  deletion_protection          = true
+  apply_immediately            = true
+  backup_retention_period      = 14
+  performance_insights_enabled = false
+  #enabled_cloudwatch_logs_exports = ["audit", "error", "general", "slowquery"]
+  vpc_security_group_ids = [module.sg.id]
+  kms_key_id             = local.kms_key_arn
+  tags                   = local.tags
 }
