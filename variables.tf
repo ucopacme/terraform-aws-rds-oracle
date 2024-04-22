@@ -15,6 +15,15 @@ variable "secret_id" {
   default     = ""
 }
 
+variable "kms_key_id" {
+  default     = null
+  description = "(Optional) ARN of existing KMS encryption key to use for storage encryption"
+  type        = string
+}
+variable "parameter_group_name" {
+  default = "default.oracle-se2-19"
+}
+
 variable "vpc_security_group_ids" {
   description = "List of VPC security groups to associate"
   type        = list(string)
