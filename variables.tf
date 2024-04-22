@@ -222,8 +222,4 @@ variable "monitoring_interval" {
   type        = number
   default     = 0
 }
-variable "manage_master_user_password" {
-  description = "Set to true to allow RDS to manage the master user password in Secrets Manager."
-  type        = bool
-  default     = false
-}
+
