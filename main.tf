@@ -20,6 +20,7 @@ resource "aws_db_instance" "this" {
   manage_master_user_password   = var.manage_master_user_password ? true : null
   username                      = var.manage_master_user_password ? var.username : jsondecode(aws_secretsmanager_secret_version.this[0].secret_string)["username"]
   password                      = var.manage_master_user_password ? null : jsondecode(aws_secretsmanager_secret_version.this[0].secret_string)["password"]
+   parameter_group_name         = var.parameter_group_name
   skip_final_snapshot           = var.skip_final_snapshot
   storage_encrypted             = var.storage_encrypted
   storage_type                  = var.storage_type
@@ -28,6 +29,7 @@ resource "aws_db_instance" "this" {
   vpc_security_group_ids        = var.vpc_security_group_ids
   publicly_accessible           = var.publicly_accessible
   apply_immediately             = var.apply_immediately
+  kms_key_id                    = var.create_cmk ? aws_kms_key.this.*.arn[0] : var.kms_key_id
   license_model                 = var.license_model
   port                          = var.port
   performance_insights_enabled  = var.performance_insights_enabled
