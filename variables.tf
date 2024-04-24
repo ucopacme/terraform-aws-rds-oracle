@@ -178,7 +178,7 @@ variable "max_allocated_storage" {
 
 variable "license_model" {
   description = "One of license-included, bring-your-own-license, general-public-license"
-  default = "bring-your-own-license"
+  default = "license-included"
 }
 
 variable "port" {
