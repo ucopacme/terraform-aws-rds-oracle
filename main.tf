@@ -15,6 +15,7 @@ resource "aws_db_instance" "this" {
   db_subnet_group_name          = aws_db_subnet_group.this.*.id[0]
   engine                        = var.engine 
   engine_version                = var.engine_version
+  enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
   identifier                    = var.identifier
   instance_class                = var.instance_class
   #name                          = var.name
