@@ -20,6 +20,17 @@ variable "secret_id" {
   type        = string
   default     = ""
 }
+
+variable "bucket_name" {
+  description = "s3 bucket name"
+  type        = string
+  default     = ""
+}
+variable "ingestion_role" {
+  description = "IAM role"
+  type        = string
+  default     = ""
+}
 variable "username" {
   type = string
   description = "Username for the master DB user."
