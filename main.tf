@@ -23,6 +23,7 @@ resource "aws_db_instance" "this" {
   username                      = var.manage_master_user_password ? var.username : jsondecode(aws_secretsmanager_secret_version.this[0].secret_string)["username"]
   password                      = var.manage_master_user_password ? null : jsondecode(aws_secretsmanager_secret_version.this[0].secret_string)["password"]
   parameter_group_name          = var.parameter_group_name
+   option_group_name            = var.option_group_name
   skip_final_snapshot           = var.skip_final_snapshot
   storage_encrypted             = var.storage_encrypted
   storage_type                  = var.storage_type
