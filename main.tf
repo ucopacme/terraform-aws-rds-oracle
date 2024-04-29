@@ -47,6 +47,20 @@ resource "aws_db_instance" "this" {
   ]
 }
 
+# S3 integration for Oracle
+  s3_import {
+    source_bucket_name = var.bucket_name
+    bucket_prefix     = "backup/"
+    ingestion_role    = var.ingestion_role
+  }
+
+  s3_export {
+    target_bucket_name = var.bucket_name
+    bucket_prefix      = "export/"
+    ingestion_role     = var.ingestion_role
+  }
+
+
 # create db subnet group
 resource "aws_db_subnet_group" "this" {
   count                         = var.enabled ? 1 : 0
