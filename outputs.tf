@@ -9,7 +9,7 @@ output "rds_instance_name" {
   value = join("", aws_db_instance.this.*.id)
 }
 
-output "db_instance_identifier" {
+output "rds_instance_identifier" {
   value = join("", aws_db_instance.this.*.identifier)
 }
 
