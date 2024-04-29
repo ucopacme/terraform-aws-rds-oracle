@@ -9,6 +9,10 @@ output "rds_instance_name" {
   value = join("", aws_db_instance.this.*.id)
 }
 
+output "db_instance_identifier" {
+  value = join("", aws_db_instance.this.*.identifier)
+}
+
 # Output only Address of RDS instance
 output "rds_address" {
   value = join("", aws_db_instance.this.*.address)
